@@ -26,15 +26,12 @@ const OrderList = () => {
 			const res = await fetchProductList()
 			const data = res.data
 			const formattedData: any = []
-
-			console.log({ data })
 			for (const i in data) {
 				formattedData.push({
 					value: data[i].id,
 					label: data[i].name,
 				})
 			}
-			console.log({ formattedData })
 			setProductList(formattedData)
 			setRawProductData(data)
 		} catch (error: any) {
