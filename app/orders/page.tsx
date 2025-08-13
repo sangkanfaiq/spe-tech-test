@@ -135,7 +135,6 @@ const OrderList = () => {
 				title="Add Orders - Merchant"
 				loading={isLoading.list}
 				centered
-				closable={{ 'aria-label': 'Custom Close Button' }}
 				open={isOpen.add_orders}
 				onCancel={() => {
 					setIsOpen((prev) => ({ ...prev, add_orders: false }))
