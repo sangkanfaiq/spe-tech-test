@@ -7,7 +7,8 @@ export interface ProductTypes {
     stock:       number;
 }
 export interface SelectedProductTypes {
-  id: string;
-  stock: number;
-  price: number;
+  id:           string;
+  stock:        number;
+  price:        number;
+  name:         string;
 }
