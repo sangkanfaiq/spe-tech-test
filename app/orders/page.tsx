@@ -1,6 +1,6 @@
 "use client"
 import { fetchProductList } from '@/src/lib/request'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { ProductTypes, SelectedProductTypes } from './types'
 import { Button, Flex, Form, InputNumber, Modal, notification, Select, Table, TableColumnsType, Typography } from 'antd'
 import { formatCurrency } from '@/src/utils/formats'
@@ -19,6 +19,16 @@ const OrderList = () => {
 	})
 
 	const [form_add] = Form.useForm()
+
+
+	useEffect(() => {
+		if (typeof window !== "undefined") {
+			const SAVED_ORDERS = localStorage.getItem("data_orders")
+			if (SAVED_ORDERS) {
+				setOrderList(JSON.parse(SAVED_ORDERS))
+			}
+		}
+	}, [])
 
 	async function doQueryData() {
 		try {
@@ -51,13 +61,13 @@ const OrderList = () => {
 
 	async function handleAddOrders() {
 		const FIELDS = await form_add.getFieldsValue()
-		const totalPrice = getUnitPrice() * (FIELDS.quantity || 0);
+		const TOTAL_PRICE = getUnitPrice() * (FIELDS.quantity || 0);
 		const PAYLOAD = {
 			...FIELDS,
 			unit_price: getUnitPrice(),
-			total_price: totalPrice
+			total_price: TOTAL_PRICE
 		}
-		localStorage.setItem("data_orders", PAYLOAD)
+		localStorage.setItem("data_orders", JSON.stringify(PAYLOAD))
 	}
 
 	function handleProductChange(value: string) {
