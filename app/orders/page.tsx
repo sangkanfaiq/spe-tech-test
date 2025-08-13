@@ -62,23 +62,26 @@ const OrderList = () => {
 	async function handleAddOrders() {
 		const FIELDS = await form_add.getFieldsValue();
 		const TOTAL_PRICE = getUnitPrice() * (FIELDS.quantity || 0);
-
 		const PAYLOAD = {
 			...FIELDS,
 			unit_price: getUnitPrice(),
 			total_price: TOTAL_PRICE
 		};
-
 		const savedOrders = localStorage.getItem("data_orders");
 		const ordersArray = savedOrders ? JSON.parse(savedOrders) : [];
-
-		ordersArray.push(PAYLOAD);
+		const existingIndex = ordersArray.findIndex((order: { id: string }) => order.id === PAYLOAD.id);
+		if (existingIndex > -1) {
+			ordersArray[existingIndex].quantity += FIELDS.quantity || 0;
+			ordersArray[existingIndex].total_price =
+				ordersArray[existingIndex].unit_price * ordersArray[existingIndex].quantity;
+		} else {
+			ordersArray.push(PAYLOAD);
+		}
 		localStorage.setItem("data_orders", JSON.stringify(ordersArray));
-
 		setOrderList(ordersArray);
-
 		setIsOpen(prev => ({ ...prev, add_orders: false }));
 	}
+
 
 
 	function handleProductChange(value: string) {
