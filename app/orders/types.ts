@@ -5,6 +5,7 @@ export interface ProductTypes {
     price:       number;
     url_image:   string;
     stock:       number;
+    total_price?: number;
 }
 export interface SelectedProductTypes {
   id:           string;
