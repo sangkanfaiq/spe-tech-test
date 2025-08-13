@@ -59,19 +59,29 @@ const OrderList = () => {
 		await doQueryData()
 	}
 
+	function getSavedOrders() {
+		try {
+			const data = localStorage.getItem("data_orders");
+			return data ? JSON.parse(data) : [];
+		} catch {
+			return [];
+		}
+	}
+
 	async function handleAddOrders() {
 		const FIELDS = await form_add.getFieldsValue();
 		const TOTAL_PRICE = getUnitPrice() * (FIELDS.quantity || 0);
 		const PAYLOAD = {
-			...FIELDS,
+			id: FIELDS.product,
+			name: selectedProduct?.name || "",
+			quantity: FIELDS.quantity || 0,
 			unit_price: getUnitPrice(),
 			total_price: TOTAL_PRICE
 		};
-		const savedOrders = localStorage.getItem("data_orders");
-		const ordersArray = savedOrders ? JSON.parse(savedOrders) : [];
+		const ordersArray = getSavedOrders();
 		const existingIndex = ordersArray.findIndex((order: { id: string }) => order.id === PAYLOAD.id);
 		if (existingIndex > -1) {
-			ordersArray[existingIndex].quantity += FIELDS.quantity || 0;
+			ordersArray[existingIndex].quantity += PAYLOAD.quantity;
 			ordersArray[existingIndex].total_price =
 				ordersArray[existingIndex].unit_price * ordersArray[existingIndex].quantity;
 		} else {
@@ -80,8 +90,9 @@ const OrderList = () => {
 		localStorage.setItem("data_orders", JSON.stringify(ordersArray));
 		setOrderList(ordersArray);
 		setIsOpen(prev => ({ ...prev, add_orders: false }));
+		setSelectedProduct(null);
+		form_add.resetFields();
 	}
-
 
 
 	function handleProductChange(value: string) {
@@ -110,32 +121,25 @@ const OrderList = () => {
 		{
 			title: "Product",
 			dataIndex: "name",
-			render: (data: string) => {
-				return data ? data : "-";
-			},
+			render: (data) => data || "-"
 		},
 		{
 			title: "Quantity",
-			dataIndex: "",
-			render: (data: string) => {
-				return data ? data : "-";
-			},
+			dataIndex: "quantity",
+			render: (data) => data || "-"
 		},
 		{
 			title: "Harga Satuan",
-			dataIndex: "",
-			render: (data: string) => {
-				return data ? data : "-";
-			},
+			dataIndex: "unit_price",
+			render: (data) => data ? formatCurrency(data) : "-"
 		},
 		{
 			title: "Subtotal",
-			dataIndex: "",
-			render: (data: string) => {
-				return data ? data : "-";
-			},
+			dataIndex: "total_price",
+			render: (data) => data ? formatCurrency(data) : "-"
 		},
 	];
+
 
 	return (
 		<>
@@ -143,7 +147,7 @@ const OrderList = () => {
 			<Flex justify='flex-end' style={{ marginBottom: 24 }}>
 				<Button type='primary' onClick={handleOpenModal}>Add Orders</Button>
 			</Flex>
-			<Table dataSource={orderList} columns={columns} />
+			<Table rowKey="id" dataSource={orderList} columns={columns} />
 
 			<Modal
 				title="Add Orders - Merchant"
