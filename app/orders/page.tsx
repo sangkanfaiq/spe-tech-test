@@ -2,10 +2,11 @@
 import { fetchProductList } from '@/src/lib/request'
 import React, { useState } from 'react'
 import { ProductTypes, SelectedProductTypes } from './types'
-import { Button, Flex, Form, InputNumber, Modal, Select, Table, TableColumnsType, Typography } from 'antd'
+import { Button, Flex, Form, InputNumber, Modal, notification, Select, Table, TableColumnsType, Typography } from 'antd'
 import { formatCurrency } from '@/src/utils/formats'
 
 const OrderList = () => {
+	const [api, contextHolder] = notification.useNotification()
 	const [productList, setProductList] = useState([])
 	const [rawProductData, setRawProductData] = useState([])
 	const [orderList, setOrderList] = useState([])
@@ -36,8 +37,11 @@ const OrderList = () => {
 			console.log({ formattedData })
 			setProductList(formattedData)
 			setRawProductData(data)
-		} catch (error) {
-			console.log(error)
+		} catch (error: any) {
+			api.error({
+				message: `Error: ${error.response.status}`,
+				description: error?.response?.data?.message
+			})
 		} finally {
 			setIsLoading((prev) => ({ ...prev, list: false }))
 		}
@@ -50,7 +54,13 @@ const OrderList = () => {
 
 	async function handleAddOrders() {
 		const FIELDS = await form_add.getFieldsValue()
-		console.log({FIELDS})
+		const totalPrice = getUnitPrice() * (FIELDS.quantity || 0);
+		const PAYLOAD = {
+			...FIELDS,
+			unit_price: getUnitPrice(),
+			total_price: totalPrice
+		}
+		localStorage.setItem("data_orders", PAYLOAD)
 	}
 
 	function handleProductChange(value: string) {
@@ -108,6 +118,7 @@ const OrderList = () => {
 
 	return (
 		<>
+			{contextHolder}
 			<Flex justify='flex-end' style={{ marginBottom: 24 }}>
 				<Button type='primary' onClick={handleOpenModal}>Add Orders</Button>
 			</Flex>
@@ -119,7 +130,6 @@ const OrderList = () => {
 				centered
 				closable={{ 'aria-label': 'Custom Close Button' }}
 				open={isOpen.add_orders}
-				onOk={handleAddOrders}
 				onCancel={() => {
 					setIsOpen((prev) => ({ ...prev, add_orders: false }))
 					setSelectedProduct(null)
@@ -144,6 +154,7 @@ const OrderList = () => {
 					onValuesChange={() => {
 						setSelectedProduct(prev => prev ? { ...prev } : null);
 					}}
+					onFinish={handleAddOrders}
 				>
 					<Form.Item
 						label="Nama Product"
