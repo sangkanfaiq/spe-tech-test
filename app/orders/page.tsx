@@ -68,12 +68,18 @@ const OrderList = () => {
 			unit_price: getUnitPrice(),
 			total_price: TOTAL_PRICE
 		};
+
 		const savedOrders = localStorage.getItem("data_orders");
 		const ordersArray = savedOrders ? JSON.parse(savedOrders) : [];
 
 		ordersArray.push(PAYLOAD);
 		localStorage.setItem("data_orders", JSON.stringify(ordersArray));
+
+		setOrderList(ordersArray);
+
+		setIsOpen(prev => ({ ...prev, add_orders: false }));
 	}
+
 
 	function handleProductChange(value: string) {
 		const selected = rawProductData.find(
