@@ -4,7 +4,7 @@ import {
   ShoppingCartOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
-import { Divider, Layout, Menu } from 'antd';
+import { Layout, Menu } from 'antd';
 import { useRouter, usePathname } from 'next/navigation';
 import "./globals.css"
 
@@ -14,7 +14,7 @@ const siderStyle: React.CSSProperties = {
   overflow: 'auto',
   height: '100vh',
   position: 'fixed',
-  
+
 };
 
 const menuItems: MenuProps['items'] = [
@@ -40,7 +40,7 @@ const App = ({ children }: { children: React.ReactNode }) => {
   };
   const getSelectedKey = () => {
     if (pathname.startsWith('/orders')) return ['orders'];
-    return ['orders']; // Default to orders
+    return ['orders'];
   };
 
   return (
