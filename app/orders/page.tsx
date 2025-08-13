@@ -23,12 +23,12 @@ const OrderList = () => {
 
 	useEffect(() => {
 		if (typeof window !== "undefined") {
-			const SAVED_ORDERS = localStorage.getItem("data_orders")
+			const SAVED_ORDERS = localStorage.getItem("data_orders");
 			if (SAVED_ORDERS) {
-				setOrderList(JSON.parse(SAVED_ORDERS))
+				setOrderList(JSON.parse(SAVED_ORDERS));
 			}
 		}
-	}, [])
+	}, []);
 
 	async function doQueryData() {
 		try {
@@ -60,14 +60,19 @@ const OrderList = () => {
 	}
 
 	async function handleAddOrders() {
-		const FIELDS = await form_add.getFieldsValue()
+		const FIELDS = await form_add.getFieldsValue();
 		const TOTAL_PRICE = getUnitPrice() * (FIELDS.quantity || 0);
+
 		const PAYLOAD = {
 			...FIELDS,
 			unit_price: getUnitPrice(),
 			total_price: TOTAL_PRICE
-		}
-		localStorage.setItem("data_orders", JSON.stringify(PAYLOAD))
+		};
+		const savedOrders = localStorage.getItem("data_orders");
+		const ordersArray = savedOrders ? JSON.parse(savedOrders) : [];
+
+		ordersArray.push(PAYLOAD);
+		localStorage.setItem("data_orders", JSON.stringify(ordersArray));
 	}
 
 	function handleProductChange(value: string) {
