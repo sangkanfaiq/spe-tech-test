@@ -2,7 +2,7 @@
 import { fetchProductList } from '@/src/lib/request'
 import React, { useEffect, useState } from 'react'
 import { ProductTypes, SelectedProductTypes } from './types'
-import { Button, Flex, Form, InputNumber, Modal, notification, Select, Table, TableColumnsType, Typography } from 'antd'
+import { Button, Divider, Flex, Form, InputNumber, Modal, notification, Select, Table, TableColumnsType, Typography } from 'antd'
 import { formatCurrency } from '@/src/utils/formats'
 
 const OrderList = () => {
@@ -147,7 +147,20 @@ const OrderList = () => {
 			<Flex justify='flex-end' style={{ marginBottom: 24 }}>
 				<Button type='primary' onClick={handleOpenModal}>Add Orders</Button>
 			</Flex>
-			<Table rowKey="id" dataSource={orderList} columns={columns} />
+			<Table rowKey="id" dataSource={orderList} columns={columns} summary={(pageData) => {
+				const total = pageData.reduce((acc, item) => acc + (item.total_price || 0), 0);
+				if (orderList.length > 0) {
+					return (
+						<Table.Summary.Row>
+							<Table.Summary.Cell index={0} colSpan={2} />
+							<Table.Summary.Cell index={1}>Total</Table.Summary.Cell>
+							<Table.Summary.Cell index={2}>
+								<Typography.Text strong>{formatCurrency(total)}</Typography.Text>
+							</Table.Summary.Cell>
+						</Table.Summary.Row>
+					);
+				}
+			}} />
 
 			<Modal
 				title="Add Orders - Merchant"
