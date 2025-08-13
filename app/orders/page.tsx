@@ -1,7 +1,7 @@
 "use client"
 import { fetchProductList } from '@/src/lib/request'
 import React, { useState } from 'react'
-import { ProductTypes } from './types'
+import { ProductTypes, SelectedProductTypes } from './types'
 import { Button, Flex, Form, InputNumber, Modal, Select, Table, TableColumnsType, Typography } from 'antd'
 import { formatCurrency } from '@/src/utils/formats'
 
@@ -9,7 +9,7 @@ const OrderList = () => {
 	const [productList, setProductList] = useState([])
 	const [rawProductData, setRawProductData] = useState([])
 	const [orderList, setOrderList] = useState([])
-	const [selectedProduct, setSelectedProduct] = useState(null)
+	const [selectedProduct, setSelectedProduct] = useState<SelectedProductTypes | null>(null)
 	const [isLoading, setIsLoading] = useState({
 		list: false
 	})
@@ -25,8 +25,8 @@ const OrderList = () => {
 			const res = await fetchProductList()
 			const data = res.data
 			const formattedData: any = []
-			
-			console.log({data})
+
+			console.log({ data })
 			for (const i in data) {
 				formattedData.push({
 					value: data[i].id,
@@ -48,23 +48,26 @@ const OrderList = () => {
 		await doQueryData()
 	}
 
-	function handleAddOrders() {
-		console.log("Adding Orders")
+	async function handleAddOrders() {
+		const FIELDS = await form_add.getFieldsValue()
+		console.log({FIELDS})
 	}
 
 	function handleProductChange(value: string) {
-		const selected = rawProductData.find((product: any) => product.id === value)
-		setSelectedProduct(selected)
-		
-		form_add.setFieldsValue({ quantity: 1 })
+		const selected = rawProductData.find(
+			(product: SelectedProductTypes) => product.id === value
+		) || null;
+		setSelectedProduct(selected);
+
+		form_add.setFieldsValue({ quantity: 1 });
 	}
 
 	function getMaxStock() {
-		return selectedProduct ? selectedProduct.stock : 0
+		return selectedProduct?.stock ?? 0;
 	}
 
 	function getUnitPrice() {
-		return selectedProduct ? selectedProduct.price : 0
+		return selectedProduct?.price ?? 0;
 	}
 
 	function calculateTotal() {
@@ -133,33 +136,33 @@ const OrderList = () => {
 					</Flex>
 				}
 			>
-				<Form 
-					form={form_add} 
-					style={{ marginTop: 46 }} 
-					labelCol={{ span: 8 }} 
+				<Form
+					form={form_add}
+					style={{ marginTop: 46 }}
+					labelCol={{ span: 8 }}
 					wrapperCol={{ span: 16 }}
 					onValuesChange={() => {
-						setSelectedProduct(prev => ({ ...prev }))
+						setSelectedProduct(prev => prev ? { ...prev } : null);
 					}}
 				>
-					<Form.Item 
-						label="Nama Product" 
-						name="product" 
+					<Form.Item
+						label="Nama Product"
+						name="product"
 						rules={[{ required: true, message: `Product is required` }]}
 					>
-						<Select 
-							options={productList} 
+						<Select
+							options={productList}
 							onChange={handleProductChange}
 							placeholder="Select product"
 						/>
 					</Form.Item>
-					
-					<Form.Item 
-						label="Quantity" 
+
+					<Form.Item
+						label="Quantity"
 						name="quantity"
 						rules={[
 							{ required: true, message: 'Quantity is required' },
-							{ 
+							{
 								validator: (_, value) => {
 									if (value && value > getMaxStock()) {
 										return Promise.reject(new Error(`Quantity tidak boleh lebih dari ${getMaxStock()}`))
@@ -169,23 +172,23 @@ const OrderList = () => {
 							}
 						]}
 					>
-						<InputNumber 
-							min={1} 
-							max={getMaxStock()} 
+						<InputNumber
+							min={1}
+							max={getMaxStock()}
 							disabled={!selectedProduct}
 							inputMode='numeric'
-							style={{width: '100%'}}
+							style={{ width: '100%' }}
 							placeholder={selectedProduct ? `Max: ${getMaxStock()}` : 'Select product first'}
 						/>
 					</Form.Item>
-					
-					<Form.Item label="Harga Satuan">
+
+					<Form.Item label="Harga Satuan" name="unit_price">
 						<Typography.Text>
 							{selectedProduct ? formatCurrency(getUnitPrice()) : '-'}
 						</Typography.Text>
 					</Form.Item>
-					
-					<Form.Item label="Harga Total">
+
+					<Form.Item label="Harga Total" name="total_price">
 						<Typography.Text>
 							{selectedProduct ? formatCurrency(calculateTotal()) : '-'}
 						</Typography.Text>

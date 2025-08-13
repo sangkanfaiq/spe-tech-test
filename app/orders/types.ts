@@ -6,3 +6,8 @@ export interface ProductTypes {
     url_image:   string;
     stock:       number;
 }
+export interface SelectedProductTypes {
+  id: string;
+  stock: number;
+  price: number;
+}
